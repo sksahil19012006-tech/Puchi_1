@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puchi — Resident ID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --ink:#20241f;
+    --stone:#c9c2b4;
+    --stone-dark:#a89f8e;
+    --paper:#f1ece1;
+    --tabby:#79776d;
+    --green:#3f9d5f;
+    --green-bright:#52c77e;
+    --white-belly:#faf8f3;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    color:var(--paper);
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  .sheet{
+    max-width:460px;
+    margin:0 auto;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    position:relative;
+    box-shadow:0 0 60px rgba(0,0,0,0.5);
+  }
+
+  /* ---- Hero ---- */
+  .hero{
+    position:relative;
+    height:58vh;
+    min-height:360px;
+    overflow:hidden;
+    background:#3a352c;
+  }
+  .hero img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:50% 30%;
+    display:block;
+    opacity:0;
+    animation:fadeIn 1s ease forwards;
+  }
+  @keyframes fadeIn{ to{opacity:1;} }
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(15,17,13,0.05) 0%, rgba(15,17,13,0.05) 45%, rgba(15,17,13,0.92) 100%);
+  }
+  .hero-text{
+    position:absolute;
+    left:24px;
+    right:24px;
+    bottom:20px;
+    z-index:2;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--green-bright);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .eyebrow .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--green-bright);
+    box-shadow:0 0 8px var(--green-bright);
+  }
+  h1.name{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:58px;
+    line-height:0.92;
+    margin:0;
+    color:var(--white-belly);
+    letter-spacing:-0.01em;
+  }
+  .subline{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--stone);
+    margin-top:8px;
+    letter-spacing:0.03em;
+  }
+
+  /* ---- Stat strip ---- */
+  .stats{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    border-bottom:1px solid var(--stone-dark);
+  }
+  .stat{
+    padding:16px 14px;
+    border-right:1px solid var(--stone-dark);
+  }
+  .stat:last-child{border-right:none;}
+  .stat .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--tabby);
+    margin-bottom:4px;
+  }
+  .stat .value{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+  }
+
+  /* ---- Section shell ---- */
+  section{
+    padding:28px 24px;
+    border-bottom:1px solid var(--stone-dark);
+  }
+  .section-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--tabby);
+    margin:0 0 16px 0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-title::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--stone-dark);
+  }
+
+  /* ---- Health checklist ---- */
+  .checklist{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .check-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--white-belly);
+    border:1px solid var(--stone-dark);
+    border-radius:var(--radius);
+    padding:12px 14px;
+  }
+  .check-mark{
+    width:22px;height:22px;
+    border-radius:50%;
+    background:var(--green);
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .check-mark svg{width:12px;height:12px;}
+  .check-row .txt{
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink);
+  }
+
+  /* ---- Contact ---- */
+  .contact-card{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:var(--radius);
+    padding:20px;
+  }
+  .contact-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:10px 0;
+    border-bottom:1px solid rgba(241,236,225,0.14);
+  }
+  .contact-row:last-child{border-bottom:none;}
+  .contact-row .k{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--stone);
+  }
+  .contact-row a, .contact-row .v{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--white-belly);
+    text-decoration:none;
+  }
+  .contact-row a:focus-visible, button:focus-visible, .qr-wrap:focus-visible{
+    outline:2px solid var(--green-bright);
+    outline-offset:3px;
+  }
+  .call-btn{
+    margin-top:16px;
+    display:block;
+    text-align:center;
+    width:100%;
+    padding:14px;
+    background:var(--green);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    text-decoration:none;
+    border-radius:var(--radius);
+    letter-spacing:0.02em;
+    transition:background 0.15s ease;
+  }
+  .call-btn:hover{background:var(--green-bright);}
+
+  /* ---- QR ---- */
+  .qr-section{
+    text-align:center;
+    border-bottom:none;
+    padding-bottom:40px;
+  }
+  .qr-wrap{
+    display:inline-block;
+    background:var(--white-belly);
+    padding:14px;
+    border-radius:var(--radius);
+    border:1px solid var(--stone-dark);
+  }
+  #qrcode{
+    line-height:0;
+  }
+  .qr-caption{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--tabby);
+    margin-top:12px;
+    letter-spacing:0.04em;
+  }
+
+  footer{
+    text-align:center;
+    padding:18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--stone-dark);
+    letter-spacing:0.06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="hero">
+    <img src="puchi.jpg" alt="Puchi, a grey tabby cat with a white belly, looking upward with bright green eyes">
+    <div class="hero-text">
+      <div class="eyebrow"><span class="dot"></span>Community Cat — Resident ID</div>
+      <h1 class="name">Puchi</h1>
+      <div class="subline">Chinar Park, Rajarhat, Kolkata</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Age</div>
+      <div class="value">2 years</div>
+    </div>
+    <div class="stat">
+      <div class="label">Colour</div>
+      <div class="value">Grey tabby</div>
+    </div>
+    <div class="stat">
+      <div class="label">Marking</div>
+      <div class="value">White belly</div>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-title">Health record</p>
+    <div class="checklist">
+      <div class="check-row">
+        <span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#f1ece1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="txt">Sterilized</span>
+      </div>
+      <div class="check-row">
+        <span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#f1ece1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="txt">Vaccination complete</span>
+      </div>
+      <div class="check-row">
+        <span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#f1ece1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="txt">Dewormed</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-title">Care contact</p>
+    <div class="contact-card">
+      <div class="contact-row">
+        <span class="k">Phone</span>
+        <a href="tel:6289710019">6289710019</a>
+      </div>
+      <div class="contact-row">
+        <span class="k">Location</span>
+        <span class="v">Chinar Park, Rajarhat</span>
+      </div>
+      <a class="call-btn" href="tel:6289710019">Call about Puchi</a>
+    </div>
+  </section>
+
+  <section class="qr-section">
+    <p class="section-title">Scan</p>
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+    </div>
+    <div class="qr-caption">Scan to save Puchi's details</div>
+  </section>
+
+  <footer>ID CARD GENERATED FOR STREET FEEDING &amp; CARE USE</footer>
+
+</div>
+
+<script>
+  var profileText =
+    "PUCHI — Community Cat ID\n" +
+    "Age: 2 years\n" +
+    "Colour: Grey tabby, white belly\n" +
+    "Sterilized: Yes\n" +
+    "Vaccination: Complete\n" +
+    "Dewormed: Yes\n" +
+    "Location: Chinar Park, Rajarhat, Kolkata\n" +
+    "Contact: 6289710019";
+
+  new QRCode(document.getElementById("qrcode"), {
+    text: profileText,
+    width: 168,
+    height: 168,
+    colorDark: "#20241f",
+    colorLight: "#faf8f3",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+</script>
+
+</body>
+</html>
